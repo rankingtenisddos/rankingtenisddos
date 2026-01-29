@@ -446,7 +446,7 @@
 
         // ===== INICIALIZAÇÃO =====
         async function init() {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await authSupabase.auth.getSession();
             if (session) {
                 // Se já está logado, redireciona para o app
                 window.location.href = 'app.html';
@@ -482,7 +482,7 @@
             btn.classList.add('loading');
 
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
+                const { data, error } = await authSupabase.auth.signInWithPassword({
                     email,
                     password
                 });
@@ -538,7 +538,7 @@
 
             try {
                 // Criar usuário
-                const { data, error: authError } = await supabase.auth.signUp({
+                const { data, error: authError } = await authSupabase.auth.signUp({
                     email,
                     password
                 });
@@ -550,7 +550,7 @@
                 }
 
                 // Criar perfil
-                const { error: profileError } = await supabase
+                const { error: profileError } = await authSupabase
                     .from('profiles')
                     .insert([{
                         id: data.user.id,
