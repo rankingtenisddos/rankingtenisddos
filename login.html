@@ -503,82 +503,43 @@
         }
 
         // ===== CADASTRO =====
-        async function register() {
-            const name = document.getElementById('registerName').value.trim();
-            const email = document.getElementById('registerEmail').value.trim();
-            const countryCode = document.getElementById('countryCode').value;
-            const phone = countryCode + document.getElementById('registerPhone').value.trim();
-            const birthDate = document.getElementById('registerBirthDate').value;
-            const password = document.getElementById('registerPassword').value;
-            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+       async function register() {
+    // ... validações iguais ...
+    
+    const btn = event.target;
+    btn.classList.add('loading');
 
-            // Validações
-            if (!name || !email || !phone || !birthDate || !password || !passwordConfirm) {
-                showAlert('Preencha todos os campos!', 'error');
-                return;
-            }
-
-            if (name.length < 3) {
-                showAlert('Nome deve ter no mínimo 3 caracteres!', 'error');
-                return;
-            }
-
-            if (password.length < 6) {
-                showAlert('Senha deve ter no mínimo 6 caracteres!', 'error');
-                return;
-            }
-
-            if (password !== passwordConfirm) {
-                showAlert('Senhas não conferem!', 'error');
-                return;
-            }
-
-            const btn = event.target;
-            btn.classList.add('loading');
-
-            try {
-                // Criar usuário
-                const { data, error: authError } = await authSupabase.auth.signUp({
-                    email,
-                    password,
-                    options: {
-                        data: {
-                            full_name: name  // ← Adicione isso
-                        }
-                    }
-                });
-
-                if (authError) {
-                    showAlert('Erro ao cadastrar: ' + authError.message, 'error');
-                    btn.classList.remove('loading');
-                    return;
+    try {
+        // 1. Criar usuário com metadados
+        const { data, error: authError } = await authSupabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: {
+                    full_name: name,
+                    phone: phone,
+                    birth_date: birthDate
                 }
-
-                // Criar perfil
-                const { error: profileError } = await authSupabase
-                    .from('profiles')
-                    .insert([{
-                        id: data.user.id,
-                        full_name: name,
-                        email: email,
-                        phone: phone,
-                        birth_date: birthDate
-                    }]);
-
-                if (profileError) {
-                    showAlert('Erro ao criar perfil: ' + profileError.message, 'error');
-                } else {
-                    showAlert('Cadastro realizado com sucesso! Faça login para continuar.', 'success');
-                    setTimeout(() => {
-                        switchForm('login');
-                    }, 1500);
-                }
-            } catch (err) {
-                showAlert('Erro ao cadastrar: ' + err.message, 'error');
-            } finally {
-                btn.classList.remove('loading');
             }
+        });
+
+        if (authError) {
+            showAlert('Erro ao cadastrar: ' + authError.message, 'error');
+            return;
         }
+
+        // 2. REMOVER INSERT manual - usar trigger
+        // O trigger vai criar o profile automaticamente
+
+        showAlert('Cadastro OK! Verifique seu email e faça login.', 'success');
+        setTimeout(() => switchForm('login'), 2000);
+        
+    } catch (err) {
+        showAlert('Erro: ' + err.message, 'error');
+    } finally {
+        btn.classList.remove('loading');
+    }
+}
 
         // ===== UTILITÁRIOS =====
         function showAlert(message, type) {
