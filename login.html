@@ -503,14 +503,41 @@
         }
 
         // ===== CADASTRO =====
-       async function register() {
-    // ... validações iguais ...
-    
+      async function register() {
+    const name = document.getElementById('registerName').value.trim();
+    const email = document.getElementById('registerEmail').value.trim();
+    const countryCode = document.getElementById('countryCode').value;
+    const phone = countryCode + document.getElementById('registerPhone').value.trim();
+    const birthDate = document.getElementById('registerBirthDate').value;
+    const password = document.getElementById('registerPassword').value;
+    const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+
+    // Validações
+    if (!name || !email || !phone || !birthDate || !password || !passwordConfirm) {
+        showAlert('Preencha todos os campos!', 'error');
+        return;
+    }
+
+    if (name.length < 3) {
+        showAlert('Nome deve ter no mínimo 3 caracteres!', 'error');
+        return;
+    }
+
+    if (password.length < 6) {
+        showAlert('Senha deve ter no mínimo 6 caracteres!', 'error');
+        return;
+    }
+
+    if (password !== passwordConfirm) {
+        showAlert('Senhas não conferem!', 'error');
+        return;
+    }
+
     const btn = event.target;
     btn.classList.add('loading');
 
     try {
-        // 1. Criar usuário com metadados
+        // Criar usuário COM METADADOS (para trigger pegar)
         const { data, error: authError } = await authSupabase.auth.signUp({
             email,
             password,
@@ -525,21 +552,24 @@
 
         if (authError) {
             showAlert('Erro ao cadastrar: ' + authError.message, 'error');
+            btn.classList.remove('loading');
             return;
         }
 
-        // 2. REMOVER INSERT manual - usar trigger
-        // O trigger vai criar o profile automaticamente
+        // ✅ TRIGGER automático cria profiles - sem INSERT manual!
 
-        showAlert('Cadastro OK! Verifique seu email e faça login.', 'success');
-        setTimeout(() => switchForm('login'), 2000);
-        
+        showAlert('Cadastro realizado! Confirme seu email e faça login.', 'success');
+        setTimeout(() => {
+            switchForm('login');
+        }, 2000);
+
     } catch (err) {
-        showAlert('Erro: ' + err.message, 'error');
+        showAlert('Erro ao cadastrar: ' + err.message, 'error');
     } finally {
         btn.classList.remove('loading');
     }
 }
+
 
         // ===== UTILITÁRIOS =====
         function showAlert(message, type) {
