@@ -540,7 +540,11 @@
                 // Criar usuário
                 const { data, error: authError } = await authSupabase.auth.signUp({
                     email,
-                    password
+                    password,
+                    options: {
+                        data: {
+                            full_name: name  // ← Adicione isso
+                        }
                 });
 
                 if (authError) {
